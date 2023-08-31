@@ -60,9 +60,10 @@ while True:
               oled.text(str("neue Karte!"),0,0)
               oled.show()
               #if knopf 4 gedrückt
+              accounts.update({str(uid):a})
               time.sleep(2)
               with open("accounts.json","w") as file:
-                  json.dump(accounts, file, indent =4)
+                  json.dump(accounts, file)
               oled.fill(0)
               oled.text(str(uid),0,0)
               oled.show()
