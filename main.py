@@ -6,8 +6,12 @@ import time
 from machine import Pin, I2C
 from sh1106 import SH1106_I2C
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #jason datei
 import json
+with open("accounts.json","r") as file:
+    accounts = json.load(file)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -19,8 +23,7 @@ oled = SH1106_I2C(128, 64, i2c,addr=devices[0])
 
 
 #jason datei initialisieren
-dict_cards = {"346941651":0,"1230308668":0}
-#dict_cards = json.loads("accounts")
+
 
 
 
@@ -28,11 +31,11 @@ dict_cards = {"346941651":0,"1230308668":0}
 while True:
       
       uid = ComClass.readfromcard(1)
-      #print(uid)
+      print(uid)
       
-      if str(uid) in dict_cards:
+      if str(uid) in accounts:
          #guthaben aus liste laden 
-         a=dict_cards[str(uid)]
+         a=accounts[str(uid)]
          print(a)
          
          #guthabenauf und entladen
@@ -40,7 +43,7 @@ while True:
          print(a)
          
          #liste updaten
-         dict_cards.update({str(uid):a})
+         accounts.update({str(uid):a})
 
           
          oled.fill(0)
@@ -48,16 +51,16 @@ while True:
          oled.text(str(a),0,30)
          oled.show()
          time.sleep(0.5)
-      else:
-          oled.fill(0)
-          oled.text(str("neue Karte!"),0,0)
-          oled.show()
-          #if knopf 4 gedrückt
-          time.sleep(2)
-          dict_cards.update({str(uid):a})
-          oled.fill(0)
-          oled.text(str(uid),0,0)
-          oled.show()
-          time.sleep(2)
+#      else:
+#          oled.fill(0)
+#          oled.text(str("neue Karte!"),0,0)
+#          oled.show()
+#          #if knopf 4 gedrückt
+#          time.sleep(2)
+ #         accounts.update({str(uid):a})
+ #         oled.fill(0)
+ #         oled.text(str(uid),0,0)
+ #         oled.show()
+ #         time.sleep(2)
           
     
