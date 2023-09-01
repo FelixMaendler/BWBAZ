@@ -37,25 +37,25 @@ aufladenzehner = Pin(20, Pin.IN, Pin.PULL_DOWN)
 kartehinzufügen = Pin(19, Pin.IN, Pin.PULL_DOWN)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def on_pressed_aufladen(timer):
-    
+    global Guthaben
     Guthaben = Guthaben + 1;
     print(Guthaben)
     print("guthaben aufladen 1")
 
 def on_pressed_bezahlen(timer):
-    
+    global Guthaben
     
     Guthaben = Guthaben - 1;
     print("guthaben bezahlen 1")
     
 def on_pressed_aufladenzehner(timer):
-    
+    global Guthaben
     Guthaben = Guthaben +10;
     print("guthaben aufladen 10")
     #return Guthaben
     
 def on_pressed_kartehinzufugen(timer):
-    
+    global flag
     flag = True
     #return flag
 
@@ -67,7 +67,7 @@ def btn_debounce_bezahlen(pin):
     Timer().init(mode = Timer.ONE_SHOT, period = 550, callback = on_pressed_bezahlen)
 
 def btn_debounce_aufladenzehner(pin):
-    Timer().init(mode = Timer.ONE_SHOT, period = 550, callback = on_pressed_aufladenzehner)
+    Timer().init(mode = Timer.ONE_SHOT, period = 650, callback = on_pressed_aufladenzehner)
 
 def btn_debounce_kartehinzufugen(pin):
     Timer().init(mode = Timer.ONE_SHOT, period = 550, callback = on_pressed_kartehinzufugen)
@@ -77,7 +77,7 @@ def btn_debounce_kartehinzufugen(pin):
 while True:
       
       uid = ComClass.readfromcard(1)
-      print(uid)
+      #print(uid)
       
 #ablauf wenn karte bekannt ist      
       if str(uid) in accounts and uid:
