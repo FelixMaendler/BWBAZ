@@ -1,66 +1,19 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #cardreader
-from tests.cardReaderTest import CardReader
+from readtest import ComClass
 import time
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #oledDisplay
 from machine import Pin, I2C
-from source.sh1106 import SH1106_I2C
+from sh1106 import SH1106_I2C
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #jason datei
 import json
 
-
-class App():
-    def __init__(self):
-        
-        self.CardId  = None
-        self.Balance = None
-        
-    def run():
-        
-        while True:
-            pass
-            #Lesen der Karte
-            # Wenn gefunden in self.Car.. self.Bal
-            
-            #Wenn neueCard = self.Car timeout auf 5 sec
-            #Wenn neueCard andere dann self.Car = neueCard und timeout auf 5
-            #oneshotimer auf 5 sec -> resetCard
-            uid = cardReader.readfromcard()
-      
-            uid = uid.get("cardId", None)
-
-            if uid is None:
-              #print("No Card")          
-              utime.sleep_ms(250)
-              continue
-            else:
-              print(uid)
-              
-            try:
-              with open("sd/accounts.json","r") as file:
-                accounts = json.load(file)
-            
-              self.CardId = uid
-              
-              if uid in accounts.keys():
-                self.Bal    = accounts.get(uid, 0.00)
-                  
-              else:               
-                self.Bal    = 0
-                self.NewCardFlag = True
-              
-            except:
-              print("No File")
-              with open("sd/accounts.json","w") as file:
-                  json.dump({}, file)
-            
-    def resetCard(self):
-        self.CardId = None
-        self.Balance= None
+with open("accounts.json","r") as file:
+    accounts = json.load(file)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -121,59 +74,9 @@ def btn_debounce_kartehinzufugen(pin):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-import utime
-
-cardReader = CardReader()
-
-import sdcard
-import uos
-
-# Assign chip select (CS) pin (and start it high)
-cs = machine.Pin(9, machine.Pin.OUT)
-
-# Intialize SPI peripheral (start with 1 MHz)
-spi = machine.SPI(1,
-                  baudrate=1000000,
-                  polarity=0,
-                  phase=0,
-                  bits=8,
-                  firstbit=machine.SPI.MSB,
-                  sck=machine.Pin(10),
-                  mosi=machine.Pin(11),
-                  miso=machine.Pin(8))
-
-# Initialize SD card
-sd = sdcard.SDCard(spi, cs)
-
-# Mount filesystem
-vfs = uos.VfsFat(sd)
-uos.mount(vfs, "/sd")
-
-print("Init")
-
-
 while True:
       
-      uid = cardReader.readfromcard()
-      
-      uid = uid.get("cardId", None)
-      
-      if uid is None:
-          #print("No Card")          
-          utime.sleep_ms(250)
-          continue
-      else:
-          print(uid)
-          
-      print("test")
-      
-      try:
-        with open("sd/accounts.json","r") as file:
-          accounts = json.load(file)
-      except:
-          print("No File")
-          accounts = {}
-      
+      uid = ComClass.readfromcard(1)
       #print(uid)
       
 #ablauf wenn karte bekannt ist      
@@ -193,8 +96,7 @@ while True:
          #liste updaten
          accounts.update({str(uid):Guthaben})
          
-         print("Write Card")
-         with open("sd/accounts.json","w") as file:
+         with open("accounts.json","w") as file:
                   json.dump(accounts, file)
 
           
@@ -212,15 +114,15 @@ while True:
               oled.text(str("neue Karte!"),0,0)
               oled.show()
               
-              #on_pressed_kartehinzufugen.irq(handler=btn_debounce_kartehinzufugen, trigger = Pin.IRQ_RISING) 
+              on_pressed_kartehinzufugen.irq(handler=btn_debounce_kartehinzufugen, trigger = Pin.IRQ_RISING) 
               
-              if True:
+              if flag:
                   
                   accounts.update({str(uid):0})
                   
                   time.sleep(0.5)
                   
-                  with open("sd/accounts.json","w") as file:
+                  with open("accounts.json","w") as file:
                       json.dump(accounts, file)
                   
                   oled.fill(0)
