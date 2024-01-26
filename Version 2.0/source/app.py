@@ -58,6 +58,19 @@ class App():
                           sck=machine.Pin(10),
                           mosi=machine.Pin(11),
                           miso=machine.Pin(8))
+        
+        #Buttons zum auf und entladen
+        self.ButtonLoadOne = machine.Pin(22, machine.Pin.IN, Pin.PULL_DOWN)
+        self.ButtonLoadOne.irq(trigger = Pin.IRQ_FALLING, handler = self.ButtonLoadOne)
+        
+        self.ButtonLoadTen = machine.Pin(20, machine.Pin.IN, Pin.PULL_DOWN)
+        self.ButtonLoadTen.irq(trigger = Pin.IRQ_FALLING, handler = self.ButtonLoadTen)
+        
+        self.ButtonPay	   = machine.Pin(21, machine.Pin.IN, Pin.PULL_DOWN)
+        self.ButtonPay.irq(trigger = Pin.IRQ_FALLING, handler = self.ButtonPay)
+        
+        self.NewCardGood   = machine.Pin(19, machine.Pin.IN, Pin.PULL_DOWN)
+        #self.NewCardGood.irq(trigger = Pin.IRQ_Falling, handler = self.ButtonNewCardGood)
 
         # Initialize SD card
         self.SdCard = SDCard(spi, cs)
@@ -76,7 +89,30 @@ class App():
     # Buchungsbutton
     # ...
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+    def ButtonLoadOne(self,timer):
+        TimerLoadOne = Timer()
+        TimerLoadOne.init(period = 50, mode = Timer.ONE_SHOT, callback = self.loadBudget, args = (1))
+        
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~      
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    def ButtonLoadTen(self,timer):
+        TimerLoadTen = Timer()
+        TimerLoadTen.init(period = 50, mode = Timer.ONE_SHOT, callback = self.loadBudget, args = (10))
+        
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    def ButtonPay(self,timer):
+        TimerPay = Timer()
+        TimerPay.init(period = 50, mode = Timer.ONE_SHOT, callback = self.booking)
+        
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#    def ButtonNewCardGood(self,timer):
+#        TimerNewCardGood = Timer()
+#        TimerPay.init(period = 50, mode = Timer.ONE_SHOT, callback = self.newCard)
+        
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
     def loadBudget(self, budget:int = None):
 
         if self.CurrentUser and budget:
@@ -99,12 +135,27 @@ class App():
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def booking(self):
         if self.CurrentUser:
-            pass
-            # Guthaben um 1 verringern in json        
+            # Guthaben um 1 verringern in json
+            try:
+                with open("/sd/accounts.json", "r") as file:
+                    accounts = json.load(file)
+                    
+                    self.CurrentUser.update({"budget": self.CurrentUser.get("budget") - 1})
+                    
+                    accounts.update({self.CurrentUser.get("cardId"): self.CurrentUser})
+                    
+                    with open("/sd/accounts.json", "w") as file:
+                       #file.write(json_object)
+                        json.dump(accounts, file)
+                    
+            except Exception as ex:
+                 print(ex)
+                 print("New Account Error")
+            
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def newCard(self):
-        if self.NewCardId:
+        if self.NewCardId and self.NewCardGood.value():
             pass
             # Karte anlegen
             
