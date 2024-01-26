@@ -60,16 +60,16 @@ class App():
                           miso=machine.Pin(8))
         
         #Buttons zum auf und entladen
-        self.ButtonLoadOne = machine.Pin(22, machine.Pin.IN, Pin.PULL_DOWN)
-        self.ButtonLoadOne.irq(trigger = Pin.IRQ_FALLING, handler = self.ButtonLoadOne)
+        self.ButtonLoadOne = machine.Pin(22, machine.Pin.IN, Pin.PULL_UP)
+        self.ButtonLoadOne.irq(trigger = Pin.IRQ_FALLING, handler = self.ButtonLoadOneFunc)
         
-        self.ButtonLoadTen = machine.Pin(20, machine.Pin.IN, Pin.PULL_DOWN)
-        self.ButtonLoadTen.irq(trigger = Pin.IRQ_FALLING, handler = self.ButtonLoadTen)
+        self.ButtonLoadTen = machine.Pin(20, machine.Pin.IN, Pin.PULL_UP)
+        self.ButtonLoadTen.irq(trigger = Pin.IRQ_FALLING, handler = self.ButtonLoadTenFunc)
         
-        self.ButtonPay	   = machine.Pin(21, machine.Pin.IN, Pin.PULL_DOWN)
-        self.ButtonPay.irq(trigger = Pin.IRQ_FALLING, handler = self.ButtonPay)
+        self.ButtonPay	   = machine.Pin(21, machine.Pin.IN, Pin.PULL_UP)
+        self.ButtonPay.irq(trigger = Pin.IRQ_FALLING, handler = self.ButtonPayFunc)
         
-        self.NewCardGood   = machine.Pin(19, machine.Pin.IN, Pin.PULL_DOWN)
+        self.NewCardGood   = machine.Pin(19, machine.Pin.IN, Pin.PULL_UP)
         #self.NewCardGood.irq(trigger = Pin.IRQ_Falling, handler = self.ButtonNewCardGood)
 
         # Initialize SD card
@@ -89,21 +89,22 @@ class App():
     # Buchungsbutton
     # ...
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def ButtonLoadOne(self,timer):
+    def ButtonLoadOneFunc(self,timer):
+        print("Hier")
         TimerLoadOne = Timer()
         TimerLoadOne.init(period = 50, mode = Timer.ONE_SHOT, callback = self.loadBudget, args = (1))
         
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~      
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def ButtonLoadTen(self,timer):
+    def ButtonLoadTenFunc(self,timer):
         TimerLoadTen = Timer()
         TimerLoadTen.init(period = 50, mode = Timer.ONE_SHOT, callback = self.loadBudget, args = (10))
         
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def ButtonPay(self,timer):
+    def ButtonPayFunc(self,timer):
         TimerPay = Timer()
-        TimerPay.init(period = 50, mode = Timer.ONE_SHOT, callback = self.booking)
+        TimerPay.init(period = 50, mode = Timer.ONE_SHOT, callback = self.loadBudget, args = (-1))
         
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -114,6 +115,7 @@ class App():
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
     def loadBudget(self, budget:int = None):
+        #print(budget)
 
         if self.CurrentUser and budget:
             try:
@@ -121,7 +123,7 @@ class App():
                     accounts = json.load(file)
                     
                     self.CurrentUser.update({"budget": self.CurrentUser.get("budget") + budget})
-                    
+                    print("Hier")
                     accounts.update({self.CurrentUser.get("cardId"): self.CurrentUser})
                     
                     with open("/sd/accounts.json", "w") as file:
@@ -186,7 +188,7 @@ class App():
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def showData(self):
         if self.CurrentUser:
-            print("Hier")
+            #print("Hier")
             self.NewCardId = None
             self.Display.fill(0)
             user = self.CurrentUser
@@ -198,7 +200,7 @@ class App():
     def run(self):
                 
         while True:
-            
+            #print(self.ButtonLoadOne.value())
             pass
           #self.checkReader()
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -229,7 +231,7 @@ class App():
                       self.showData()
                       
                       time.sleep(1)
-                      self.loadBudget(10)
+                      #self.loadBudget(10)
                   
                   # Karte unbekannt
                   else:
